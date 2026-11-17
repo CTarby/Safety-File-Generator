@@ -24,6 +24,12 @@ This is the same generator, with staff logins, a shared company database, shared
 - **Sessions** end after 30 minutes without activity, and when the browser tab is closed.
 - **Activity log:** sign-ins, sign-outs, files created, saved, opened, shared or deleted, letters created, PDF downloads and user changes are recorded. Only administrators can read the log; nobody can edit it from the app.
 
+## Branding
+
+- The app uses the GSRC logo colours: navy `#1f3469` for the top bar and headings, navy-blue `#243c78` for buttons, red `#c62f2b` for the accent line and grey `#5a5a5a` for secondary text.
+- **Logo:** `logo.png` is the GSRC logo with a transparent background, sized for the screen. It shows on the sign-in screen and in the top bar. To change it, replace that file in the GitHub repository with another PNG of the same name.
+- To adjust a colour, change the values at the start of the last style block in `index.html` (`--navy`, `--acc` for buttons, `--red`, `--grey`).
+
 ## Passwords
 
 - **Each person chooses their own password.** The invitation email opens the app on a "choose a password" screen. Nobody else, including the administrator, ever sees it.
