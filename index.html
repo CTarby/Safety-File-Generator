@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Site Specific Safety File Generator</title>
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<style>
+:root{--bg:#f6f5f0;--card:#fff;--ink:#1d2a2f;--mute:#5d6b70;--line:#d9d6ca;--acc:#f2b705;--accink:#1d2a2f;--lo:#cfe8d2;--md:#fbe3a0;--hi:#f6b9a8;--ex:#e58a8a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#151c1f;--card:#1e282c;--ink:#ecebe4;--mute:#9aa8ad;--line:#33424a;--lo:#2d5a39;--md:#6b5a14;--hi:#7a3d2c;--ex:#8a2f2f}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.7rem;margin:0 0 4px;border-left:10px solid var(--acc);padding-left:12px}
+h2{font-size:1.2rem;margin:28px 0 8px}h3{font-size:1rem;margin:16px 0 6px}
+.sub{color:var(--mute);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px}
+label{display:block;font-weight:600;margin:12px 0 4px}
+input,select,textarea{width:100%;padding:9px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px}
+textarea{min-height:90px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cu{display:grid;gap:8px}.mem{display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:8px;margin-bottom:6px}
+@media(max-width:640px){.row{grid-template-columns:1fr}.mem{grid-template-columns:1fr 1fr}}
+button{font:inherit;font-weight:600;padding:9px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--card);color:var(--ink);cursor:pointer}
+button.p{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{background:var(--acc);color:var(--accink);border-radius:20px;padding:3px 6px 3px 12px;font-weight:600}
+.chip button{border:0;background:none;padding:0 6px;color:inherit}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem;background:var(--card)}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+.r{font-weight:600;text-align:center}.lo{background:var(--lo)}.md{background:var(--md)}.hi{background:var(--hi)}.ex{background:var(--ex)}
+.note{font-size:.85rem;color:var(--mute)}
+.letter{page-break-after:always;border:1px solid var(--line);padding:20px;margin:10px 0;background:var(--card)}
+#out{display:none}.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}.doc th{background:#d9d9d9;color:#000}.hira td{font-size:.75rem}.doc{margin-bottom:30px}.dn{text-align:right}.hd{width:100%;margin-bottom:14px}.doc .hd td,.doc .hd th{border:1px solid var(--ink);padding:5px 8px;font-size:.8rem;background:var(--card);color:var(--ink)}.hd .lg{width:150px;text-align:center}.hd img{max-width:140px;max-height:60px}.org{width:max-content;margin:0 auto;padding:4px 0 10px;zoom:var(--zs,1)}@media print{.org{zoom:var(--zp,1)}}.org ul{display:flex;justify-content:center;position:relative;margin:0;padding:16px 0 0;list-style:none}.org>ul{padding-top:0}.org li{position:relative;padding:16px 5px 0;text-align:center;list-style:none;margin:0}.org li::before,.org li::after{content:"";position:absolute;top:0;right:50%;width:50%;height:16px;border-top:1px solid #000}.org li::after{right:auto;left:50%;border-left:1px solid #000}.org li:only-child::before,.org li:only-child::after{display:none}.org li:only-child{padding-top:0}.org li:first-child::before,.org li:last-child::after{border:0 none}.org li:last-child::before{border-right:1px solid #000}.org ul ul::before{content:"";position:absolute;top:0;left:50%;height:16px;border-left:1px solid #000}.org .bx{display:inline-block;border:1px solid #000;padding:6px 8px;min-width:110px;max-width:165px;font-size:.78rem;line-height:1.3;background:#fff;color:#000}.org .bx.top{background:#d9d9d9;max-width:260px}.org .bx.ad{border-style:dashed}.org .bx.gp{max-width:330px;text-align:left}.org .sm{font-size:.7rem}@media print{.scroll{overflow:visible}h1,.sub{display:none!important}}img.sig{max-height:42px;max-width:170px;vertical-align:middle}.tm{grid-template-columns:1.4fr 1.1fr 1.5fr 1.3fr 1.1fr auto;align-items:center}.tm .sg{font-size:.85rem}.tm .sg img{max-height:34px;max-width:120px;vertical-align:middle;background:#fff;border:1px solid var(--line)}@media(max-width:700px){.tm{grid-template-columns:1fr 1fr}}.lhimg{text-align:center;margin-bottom:8px}.doc .lhimg img{max-width:100%;max-height:38mm;display:block;margin:0 auto}@page{margin:12mm;@bottom-center{content:"Page " counter(page) " of " counter(pages);font-size:9pt}}.lhd{background:#d9d9d9;color:#000;padding:10px;margin-bottom:10px}@media print{.doc{page-break-after:always}.doc th,.lhd{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+@media print{body{background:#fff;color:#000}.noprint,#form{display:none!important}.card{border:0}.letter{border:0}}
+@media print{body.one .doc{display:none!important}body.one .doc.printme{display:block!important}.dl{display:none!important}}.dl{margin:0 0 8px}body.locked main,body.locked #ubar,body.locked #cpwp{display:none!important}body:not(.locked) #auth{display:none}#ubar{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;max-width:1100px;margin:0 auto;padding:8px 16px}@media print{#ubar,#auth{display:none!important}}</style><style id="pstamp"></style></head><body class="locked">
+<section id="auth" class="card" style="max-width:440px;margin:48px auto;padding:20px">
+<h1 style="font-size:1.4rem">Site Specific Safety File Generator</h1>
+<div id="alogin"><label for="aem">Email</label><input id="aem" type="email" autocomplete="username"><label for="apw">Password</label><input id="apw" type="password" autocomplete="current-password"><p><button type="button" class="p" id="ago">Sign in</button> <button type="button" id="afg">Forgot password</button></p></div>
+<div id="aset" style="display:none"><label for="ap1">New password (at least 10 characters)</label><input id="ap1" type="password" autocomplete="new-password"><label for="ap2">Repeat the password</label><input id="ap2" type="password" autocomplete="new-password"><p><button type="button" class="p" id="apset">Save password</button></p></div>
+<p id="amsg" role="status"></p>
+<p class="note">This system contains personal information, including names and identity numbers, processed under the Protection of Personal Information Act 4 of 2013. Use it only to prepare health and safety documents. Sign-ins, file access and PDF downloads are logged.</p>
+</section>
+<div id="ubar"><span id="uname" class="note"></span><button type="button" id="adminbtn" style="display:none">Admin</button><button type="button" id="cpw">Change password</button><button type="button" id="aout">Sign out</button></div>
+<section id="cpwp" class="card noprint" style="display:none;max-width:440px;margin:0 auto 16px;padding:16px"><h3 style="margin-top:0">Change your password</h3><label for="cp0">Current password</label><input id="cp0" type="password" autocomplete="current-password"><label for="cp1">New password (at least 10 characters)</label><input id="cp1" type="password" autocomplete="new-password"><label for="cp2">Repeat the new password</label><input id="cp2" type="password" autocomplete="new-password"><p><button type="button" class="p" id="cpsave">Save new password</button> <button type="button" id="cpcancel">Cancel</button></p><p id="cpmsg" role="status" class="note"></p></section>
+<main>
+<h1>Site Specific Safety File Generator</h1>
+<p class="sub">Capture the job, choose the type of work, and get a draft risk assessment, safe work procedures, inspection registers and appointments.</p>
+
+<section id="admin" class="card noprint" style="display:none"></section>
+<section id="form" class="card">
+<h3 style="margin-top:0">Company files</h3>
+<p class="note">Packs are saved to the company database when you generate them. You see the files you created and the files an administrator has shared with you. To issue a new revision, open the file, change the revision number, and generate again; the old revision stays in the list.</p><label for="recq">Find a file</label><input id="recq" placeholder="Company, site or revision">
+<div id="reclist"></div>
+<hr>
+<div class="row"><div><label for="co">Company name</label><input id="co"></div>
+<div><label for="site">Site or project</label><input id="site"></div></div><label for="cli">Client name (used in appointment letters)</label><input id="cli">
+<label for="px">Document number prefix (client or company code)</label><input id="px" placeholder="For example ABC for ABC Mining" autocomplete="off"><p class="note">Every document number starts with this prefix, for example ABC-SHE-HIRA-BASELINE-001. Each prefix keeps its own numbering.</p><div class="row"><div><label for="who">Prepared by</label><input id="who"></div>
+<div><label for="date">Date</label><input id="date" type="date"></div></div>
+
+<div class="row"><div><label for="rev">Revision number</label><input id="rev" value="001"></div></div><div class="row"><div><label for="rv">Review date</label><input id="rv" type="date"></div><div><label for="by">Appointed by (name)</label><input id="by"></div></div><label for="lg">Company logo (shown in the header of every document)</label><input id="lg" type="file" accept="image/*"><div id="lgp"></div><p><button type="button" id="lgx">Remove logo</button></p><label>Next document numbers</label><div id="nums" class="nums"></div><p class="note">Numbers go up by one each time a new document is created. Edit a number here to continue from an existing register.</p><label>Team members</label><p class="note">Identity numbers are used only on the appointment letters. Capture only the people who will work on or be appointed for this job.</p><p class="note">The site organogram is built from the roles. It places each person under the nearest senior role; use "Reports to" where someone reports to a specific person.</p>
+<div id="team"></div>
+<button type="button" id="addm">Add team member</button>
+
+<label style="display:flex;gap:8px;font-weight:600"><input type="checkbox" id="ctc" style="width:auto">A contractor (subcontractor) will be used on this work</label><div id="ctw" style="display:none">
+<div class="row"><div><label for="ctn">Contractor company name</label><input id="ctn"></div><div><label for="ctr">Company registration number</label><input id="ctr"></div></div>
+<div class="row"><div><label for="ctp">Contractor representative (name and surname)</label><input id="ctp"></div><div><label for="ctq">Representative's designation</label><input id="ctq" placeholder="For example Managing Director"></div></div>
+<div class="row"><div><label for="ctk">COID registration number</label><input id="ctk"></div><div><label for="cte">Contact number and email</label><input id="cte"></div></div>
+<label for="cts">Work to be done by the contractor</label><textarea id="cts" placeholder="Describe the contractor's part of the work"></textarea>
+<label for="ctd">Other contractor details (optional)</label><textarea id="ctd" style="min-height:50px"></textarea>
+<label for="ctx">Additional documents required from the contractor (optional, one per line)</label><textarea id="ctx" style="min-height:50px"></textarea>
+<p class="note">With a contractor, the file also includes a Section 37(2) agreement, a contractor appointment letter and a checklist of documents the contractor must submit.</p>
+</div><label for="scope">Scope of work</label>
+<textarea id="scope" placeholder="Describe what will be done, where, and for how long"></textarea>
+
+<h3>Client requirements (specification or safety file index)</h3>
+<p class="note">Upload the client's health and safety specification or safety file index, or paste its numbered list. The pack then includes what the client asks for: the procedures, registers, appointments and plans, a safety file index in the client's numbering, and a SHE plan annexure under the client's headings. Without this, the pack is built from the work types only.</p>
+<label for="reqfile">Upload the client's document (.docx or .txt)</label><input type="file" id="reqfile" accept=".docx,.txt,.md,.csv">
+<label for="reqtxt">Or paste the requirements here, one numbered item per line</label><textarea id="reqtxt" placeholder="1. Written appointment of a site safety officer&#10;2. Fall protection plan, inclusive of:&#10;- Formal risk assessment"></textarea>
+<p><button type="button" id="reqread">Read requirements</button> <button type="button" id="reqapply">Add what the client requires to this pack</button> <button type="button" id="reqclear">Clear</button> <span class="note" id="reqmsg"></span></p>
+<div id="reqprev"></div>
+<label for="wt">Type of work</label>
+<div class="row"><select id="wt"></select><div><button type="button" class="p" id="addw">Add work type</button></div></div>
+<div class="chips" id="chips"></div>
+<p class="note">Add every type of work that applies. The pack combines them.</p>
+<h3>Tasks and activities</h3><p class="note">The baseline risk assessment is built from the types of work above and the general site hazards. Tick the tasks and activities below to also produce a task specific risk assessment (TSRA) for them; each ticked task also gets its own safe work procedure. Ticking Ergonomics adds an ergonomic assessment row for every other ticked task in the TSRA.</p><div id="tk"></div><h3>Task library</h3><p class="note">A task library can be prepared from a client's site specification, with the SHE plan under the same headings as the specification, written as what you will do on site to meet each requirement.</p><p class="note">Load a researched task library (.json) for your client or activities. It adds work types, tasks and safe work procedure steps, and is saved on this computer.</p><input id="li" type="file" accept=".json,application/json" aria-label="Task library file"><p id="lis" class="note"></p><p><button type="button" id="lix">Clear library</button></p><h3>Safe work procedures to develop</h3><p class="note">Tick the procedures to include in the pack. The list follows the work types and tasks you have chosen.</p><p><button type="button" id="swall">Tick all</button> <button type="button" id="swnone">Untick all</button></p><div id="swsel"></div><h3>Your own tasks</h3><p class="note">Add site tasks that are not in the list. They are saved on this computer. Tick the ones to include in each pack.</p><div class="cu"><input id="ct" placeholder="Task or activity" aria-label="Task"><input id="chz" placeholder="Hazard" aria-label="Hazard"><input id="crk" placeholder="Risk or potential consequence" aria-label="Risk"><div class="row"><input id="cl" type="number" min="1" max="5" placeholder="Likelihood (1–5)" aria-label="Likelihood"><input id="cs" type="number" min="1" max="5" placeholder="Severity (1–5)" aria-label="Severity"></div><textarea id="cc" placeholder="Control measures, separated by semicolons" aria-label="Controls" style="min-height:60px"></textarea><input id="cp" placeholder="Specific PPE (optional)" aria-label="PPE"><div><button type="button" id="addc">Add task</button></div></div><div id="culist"></div>
+<h3>Appointment letters to make</h3><p class="note">Choose the appointment and the person to be appointed, then add it. Each one becomes a letter in the pack. Add the team members above first.</p><div class="row"><div><label for="aprole">Appointment</label><select id="aprole"></select></div><div><label for="apper">Person to be appointed</label><select id="apper"></select></div></div><p><button type="button" id="apadd">Add appointment letter</button></p><div id="aplist"></div>
+<p><button type="button" class="p" id="gen">Generate safety file</button></p>
+</section>
+
+<section id="out">
+<div class="noprint"><button type="button" id="edit">Edit details</button> <button type="button" id="recsave">Save to company files</button> <span class="note" id="recmsg"></span> <button type="button" id="newp">Start new pack</button> <button type="button" class="p" id="print">Print or save as PDF</button> <button type="button" class="p" id="pdfall">Download every document as a separate PDF</button></div>
+<div id="doc"></div>
+</section>
+<p class="note noprint">These documents are drafts built from templates. A competent person must review and adapt them to the actual site, and check them against the OHS Act, the Construction Regulations 2014 and your client’s requirements before use.</p>
+</main>
+<script src="config.js"></script>
+<script src="app.js"></script></body></html>
