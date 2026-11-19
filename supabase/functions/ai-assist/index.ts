@@ -29,7 +29,7 @@ const SYSTEM =
   "(including the Construction Regulations 2014) and the client's own requirements. Write in plain South African English, " +
   "in short clear sentences. Never invent regulation or section numbers: if you are not certain of a reference, write " +
   "[confirm reference]. Text in square brackets such as [name] or [ID number] replaces personal information; keep it as it is. " +
-  "Do not include any personal information. Reply with exactly the format asked for and nothing else.";
+  "Do not include any personal information. Write as the company itself: never mention AI, artificial intelligence, a language model, an assistant or that the text was generated or drafted automatically. Reply with exactly the format asked for and nothing else.";
 
 function clip(v, n) {
   return String(v == null ? "" : v).slice(0, n);
