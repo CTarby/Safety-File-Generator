@@ -658,6 +658,10 @@ saveBlob(zipStore(files),packName()+(kind==="pdf"?" PDF":" Word")+".zip");exStat
 $("zippdf").onclick=function(){zipAll("pdf")};
 $("zipword").onclick=function(){zipAll("word")};
 $("out").addEventListener("click",function(e){var t=e.target;if(!t.dataset||!t.dataset.word)return;var d=t.closest(".doc");if(!d)return;try{saveBlob(wordDoc(d),fileSafe(docInfo(d))+".docx");if(window.onExport)window.onExport("word_doc",{doc:docInfo(d)})}catch(x){alert("The Word file could not be made: "+x.message)}});
+$("fsave").onclick=function(){if(!$("co").value.trim()){alert("Enter the company name first, so the file can be saved.");$("co").focus();return}$("fsavemsg").textContent="Saving…";saveRec(false)};
+new MutationObserver(function(){var t=$("recmsg").textContent;if(t)$("fsavemsg").textContent=t}).observe($("recmsg"),{childList:true,characterData:true,subtree:true});
+document.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&(e.key==="s"||e.key==="S")&&$("form").style.display!=="none"&&!document.body.classList.contains("locked")){e.preventDefault();$("fsave").onclick()}});
+
 $("ctc").onchange=function(){$("ctw").style.display=$("ctc").checked?"block":"none"};
 drawTeam();drawNums();drawEq();
 
