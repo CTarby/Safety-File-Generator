@@ -119,6 +119,67 @@ function buildTask(b) {
       }],
     };
   }
+  if (task === "analyse_scope") {
+    const cat = b.catalog || {};
+    const list = (x) => (Array.isArray(x) ? x.slice(0, 200).map((v) => "- " + clip(v, 120)).join("\n") : "");
+    const content = [];
+    const file = b.file;
+    if (file && file.data) {
+      if (String(file.data).length > 14_000_000) throw new Error("The file is too large. Use a file under 10 MB.");
+      if (file.type === "application/pdf") content.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: file.data } });
+      else if (/^image\/(png|jpeg|gif|webp)$/.test(file.type)) content.push({ type: "image", source: { type: "base64", media_type: file.type, data: file.data } });
+      else throw new Error("Unsupported file type.");
+    }
+    if (b.doc_text) content.push({ type: "text", text: "SCOPE DOCUMENT TEXT:\n" + clip(b.doc_text, 120000) });
+    content.push({
+      type: "text",
+      text: contextBlock({ ...b, documents: [] }) + "\n\n" +
+        "CATALOGUE (choose only from these, using the names exactly as written):\n" +
+        "WORK TYPES:\n" + list(cat.work_types) + "\n\nTASKS AND ACTIVITIES:\n" + list(cat.tasks) +
+        "\n\nEQUIPMENT (each has an inspection register):\n" + list(cat.equipment) + "\n\nAPPOINTMENTS:\n" + list(cat.appointments) + "\n\n" +
+        "Read the scope of work (and the scope document, if one is attached) and decide everything this job needs for its site-specific " +
+        "safety file under the OHS Act and the Construction Regulations 2014: the work types, tasks and activities, equipment that will be " +
+        "used on site, and the written appointments. Be complete but do not add things the scope gives no reason for. Then list up to 15 " +
+        "hazards specific to this job that a general work-type hazard list would miss, each rated before controls with likelihood and " +
+        "severity from 1 to 5, with practical controls and PPE. Finally list anything the preparer must confirm because the scope is unclear.\n" +
+        "Reply with JSON only, in this form:\n" +
+        '{"summary":"2-3 sentences","work_types":[{"name":"...","why":"..."}],"tasks":[{"name":"...","why":"..."}],' +
+        '"equipment":[{"name":"...","why":"..."}],"appointments":[{"name":"...","why":"..."}],"contractor_likely":false,' +
+        '"hazards":[{"activity":"...","hazard":"...","consequence":"...","likelihood":3,"severity":4,"controls":["..."],"ppe":"..."}],' +
+        '"confirm":["..."]}',
+    });
+    return { content, max: 8000 };
+  }
+  if (task === "she_plan") {
+    const spec = b.mode === "spec";
+    const extra = "\nTEAM ROLES ON SITE: " + clip((b.team_roles || []).join("; "), 2000) +
+      "\nWRITTEN APPOINTMENTS IN THIS FILE: " + clip((b.appointments || []).join("; "), 3000);
+    return {
+      max: 16000,
+      content: [{
+        type: "text",
+        text: contextBlock(b) + extra + "\n\n" +
+          (spec
+            ? "Write the complete site-specific SHE plan for this job under the client's own specification. Use one section per top-level " +
+              "client requirement, with exactly the client's number and a short heading taken from the requirement. In each section state " +
+              "what the company will do on site to meet the requirement and its sub-items, specific to this scope of work, and refer to the " +
+              "documents in the file by title and number. Where evidence must be supplied, say who supplies what and when. Where no document " +
+              "in the file covers a requirement, say what will be done and end with '[Document to be developed]'."
+            : "Write the complete site-specific SHE plan for this job as required by the Construction Regulations 2014 (the principal " +
+              "contractor's health and safety plan) and the OHS Act. Use these headings, leaving out any that do not apply to this scope and " +
+              "adding any the scope needs: Scope and description of the work; Legal and client requirements; Organisation, responsibilities " +
+              "and appointments; Risk assessment; Safe work procedures and permits to work; Fall protection (only if work at height); Plant, " +
+              "equipment and inspections; Competence, training and medical fitness; Induction and communication; Personal protective " +
+              "equipment; Emergency preparedness and first aid; Incident reporting and investigation; Contractor management (only if " +
+              "contractors are used); Occupational health and hygiene; Environmental controls and housekeeping; Monitoring, inspections and " +
+              "audits; Health and safety file and records; Review of this plan. Write each section specifically for this scope, site and " +
+              "client, and refer to the documents in the file by title and number.") +
+          "\nWrite in plain South African English, using the company's name. Paragraphs are separated by new lines; list items start with '- '.\n" +
+          "Reply with JSON only, in this form:\n" +
+          '{"sections":[{"no":"1","heading":"...","text":"..."}]}',
+      }],
+    };
+  }
   if (task === "improve_doc") {
     return {
       max: 6000,

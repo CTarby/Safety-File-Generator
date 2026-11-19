@@ -88,10 +88,14 @@ For each person: **Authentication → Users → Add user → Send invitation**. 
 
 ## AI assistant
 
-The app can use Claude, Anthropic's AI model, through Anthropic's API. Staff given AI access get four functions:
+The app can use Claude, Anthropic's AI model, through Anthropic's API. Staff given AI access get these functions:
+
+- **Analyse scope with AI** (under the scope of work): reads the scope of work, and a scope document if one is attached, then ticks the types of work, tasks, equipment and extra appointments it thinks the job needs, with the reason for each. It also prepares up to 15 hazards specific to the job for the baseline risk assessment (marked "(AI)" on screen), and lists anything the preparer must confirm. Check the selections, then generate. After generating, the AI writes the SHE plan automatically: under the client specification's headings when a specification is loaded, otherwise under the legal SHE plan headings for the scope. Analysing and writing the plan together count as one AI use.
+- **Write SHE plan with AI** (AI tools menu): writes or rewrites the SHE plan for a generated file.
+
+Other AI functions:
 
 - **Read specification with AI** (Client requirements section): reads the client's specification or safety file index from a PDF, Word .docx, text file or photo of a scan, and lists the requirements in the client's numbering.
-- **Write annexure with AI** (after generating): writes SHE plan Annexure A under the client's headings, referring to the documents and numbers in the file. Each AI section is marked on screen as an AI draft to check; the mark does not print.
 - **Check against specification (AI)** (after generating): marks each requirement covered, partly covered or missing, with an action. This is advice on screen only; it is not part of the file.
 - **Improve with AI** (on each document): suggests additions for that document. Staff choose which to insert. Inserted text is marked on screen until the file is issued.
 
@@ -101,7 +105,7 @@ Who can use it:
 
 How it is protected:
 - The Anthropic key is kept in Supabase as a secret and is used only by the server function. It never reaches the browser.
-- The function only runs these four tasks; nobody can send it other instructions.
+- The function only runs these tasks; nobody can send it other instructions.
 - Every request checks that the person is signed in and active, is limited: each staff member has a total allowance of 5 AI uses (an administrator can change a person's allowance on the Admin page), and administrators are limited to 40 a day (change `admin_limit` in `ai.sql`), and is recorded in the activity log with the tokens used. Administrators see AI use per person on the Admin page.
 - Team names, ID numbers and the names of the appointer, preparer and contractor representative are replaced with [name] and [ID number] before anything is sent. Signatures are never sent. A PDF or photo of the client's specification is sent as it is, so do not upload documents that contain personal information.
 

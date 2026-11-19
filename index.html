@@ -73,7 +73,7 @@ th{background:var(--bg)}
 <label for="ctx">Additional documents required from the contractor (optional, one per line)</label><textarea id="ctx" style="min-height:50px"></textarea>
 <p class="note">With a contractor, the file also includes a Section 37(2) agreement, a contractor appointment letter and a checklist of documents the contractor must submit.</p>
 </div><label for="scope">Scope of work</label>
-<textarea id="scope" placeholder="Describe what will be done, where, and for how long"></textarea>
+<textarea id="scope" placeholder="Describe what will be done, where, and for how long"></textarea><div class="aibox scbox"><label for="scopefile">Scope document (optional: tender scope, work order or method statement)</label><input type="file" id="scopefile" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg"><p><button type="button" class="p" id="scai">Analyse scope with AI</button> <span class="note" id="scmsg" role="status"></span></p><p class="note aileft"></p></div><div id="scopeai"></div>
 
 <h3>Client requirements (specification or safety file index)</h3>
 <p class="note">Upload the client's health and safety specification or safety file index, or paste its numbered list. The pack then includes what the client asks for: the procedures, registers, appointments and plans, a safety file index in the client's numbering, and a SHE plan annexure under the client's headings. Without this, the pack is built from the work types only.</p>
@@ -93,7 +93,7 @@ th{background:var(--bg)}
 <section id="out">
 <div class="tbar noprint">
 <div class="tgrp tl"><button type="button" id="edit">← Edit details</button><button type="button" id="newp">Start new pack</button><button type="button" id="recsave">Save</button><span class="tstat"><span class="note" id="recmsg" role="status"></span> <span class="note" id="exstat" role="status"></span> <span class="note" id="aistat" role="status"></span></span></div>
-<div class="tgrp" style="margin-left:auto"><details class="dd aimenu"><summary>AI tools ▾</summary><div class="ddm"><span class="note aileft"></span><button type="button" id="aiann">Write SHE plan annexure</button><button type="button" id="aigapb">Check against specification</button></div></details><details class="dd"><summary class="p">Download ▾</summary><div class="ddm"><button type="button" id="zippdf">All documents as PDF (ZIP)</button><button type="button" id="zipword" class="wordbtn">All documents as Word (ZIP)</button><button type="button" id="print">Whole file as one PDF</button></div></details></div>
+<div class="tgrp" style="margin-left:auto"><details class="dd aimenu"><summary>AI tools ▾</summary><div class="ddm"><span class="note aileft"></span><button type="button" id="aiann">Write SHE plan with AI</button><button type="button" id="aigapb">Check against specification</button></div></details><details class="dd"><summary class="p">Download ▾</summary><div class="ddm"><button type="button" id="zippdf">All documents as PDF (ZIP)</button><button type="button" id="zipword" class="wordbtn">All documents as Word (ZIP)</button><button type="button" id="print">Whole file as one PDF</button></div></details></div>
 </div>
 <div id="generr" class="noprint" role="alert"></div><div id="aigap" class="noprint"></div><div id="doc"></div>
 </section>
