@@ -12,6 +12,7 @@ This is the same generator, with staff logins, a shared company database, shared
 | `supabase/schema.sql` | The database: tables, access rules, numbering and activity log |
 | `supabase/ai.sql` | The AI additions only, for a database that is already set up |
 | `supabase/update-2026-11-19.sql` | Word download permission and download logging, for a database that is already set up |
+| `supabase/update-2026-11-19b.sql` | Saved companies, contractors and team members (with signatures), for a database that is already set up |
 | `supabase/functions/ai-assist/index.ts` | The server function that connects the app to the AI |
 | `logo.png` | The GSRC logo |
 | `POPIA-CHECKLIST.md` | What the system does for POPIA and what you still need to do as a company |
@@ -111,7 +112,7 @@ How it is protected:
 
 ### Setting up the AI (about 15 minutes)
 1. Anthropic API account with credit and a monthly spend limit, and a key saved in Supabase as the secret `ANTHROPIC_API_KEY` (done).
-2. In Supabase **SQL Editor**, run `supabase/ai.sql` and then `supabase/update-2026-11-19.sql` (new installations get it from `schema.sql`). Run it **before** uploading the new app files. It is safe to run again.
+2. In Supabase **SQL Editor**, run `supabase/ai.sql` then `supabase/update-2026-11-19.sql`, then `supabase/update-2026-11-19b.sql` (new installations get it from `schema.sql`). Run it **before** uploading the new app files. It is safe to run again.
 3. In Supabase **Edge Functions**, choose **Deploy a new function → Via Editor**. Name it exactly `ai-assist`, replace the sample code with the whole of `supabase/functions/ai-assist/index.ts`, and click **Deploy**.
 4. Optional: add a secret `ANTHROPIC_MODEL` to use a different Claude model. The default is `claude-sonnet-5-5`.
 5. Upload the new `index.html` and `app.js` to GitHub. Test **Read specification with AI** with a client index.
