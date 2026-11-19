@@ -73,6 +73,14 @@ language sql stable security definer set search_path = public as $$
                     - (select count(*)::integer from public.ai_usage where user_id = auth.uid() and counted)) end
 $$;
 
+-- A request that fails (AI error or time-out) does not use up the person's allowance
+create or replace function public.ai_refund(p_id bigint) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  update public.ai_usage set counted = false
+   where id = p_id and user_id = auth.uid() and input_tokens is null;
+end $$;
+
 create or replace function public.ai_end(p_id bigint, p_in integer, p_out integer) returns void
 language plpgsql security definer set search_path = public as $$
 begin
@@ -82,4 +90,5 @@ end $$;
 
 revoke execute on function public.ai_begin(text) from anon;
 revoke execute on function public.ai_left() from anon;
+revoke execute on function public.ai_refund(bigint) from anon;
 revoke execute on function public.ai_end(bigint, integer, integer) from anon;

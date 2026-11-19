@@ -834,3 +834,10 @@ var _genAI=$("gen").onclick;$("gen").onclick=async function(){await _genAI.apply
 var _snap3=snap;snap=function(){var r=_snap3();r.aihaz=AIHAZ;r.airoles=AIROLES;r.aishe=AISHE;r.aiscope=AISCOPE;return r};
 var _openRec3=openRec;openRec=function(r){AIHAZ=r.aihaz||[];AIROLES=r.airoles||[];AISHE=r.aishe||null;AISCOPE=!!r.aiscope;$("scopeai").innerHTML="";_openRec3(r)};
 $("newp").addEventListener("click",function(){AIHAZ=[];AIROLES=[];AISHE=null;AISCOPE=false;$("scopeai").innerHTML=""});
+
+/* ---------- visible progress and errors for every AI request ---------- */
+(function(){var bx=document.createElement("div");bx.id="aibusy";bx.setAttribute("role","status");bx.className="noprint";document.body.appendChild(bx);var tm=null,hide=null;
+function show(t,err){clearTimeout(hide);bx.textContent=t;bx.className="noprint"+(err?" err":"");bx.style.display="block"}
+var _call=aiCall;aiCall=async function(task,payload){var t0=Date.now(),lab={read_spec:"Reading the client document",analyse_scope:"Analysing the scope of work",she_plan:"Writing the SHE plan",gap_check:"Checking against the specification",improve_doc:"Reviewing the document",annex:"Writing the annexure"}[task]||"Working";
+clearInterval(tm);show(lab+"… 0 s");tm=setInterval(function(){var s=Math.round((Date.now()-t0)/1000);show(lab+"… "+(s<60?s+" s":Math.floor(s/60)+" min "+(s%60)+" s")+" (usually under 2 minutes)")},1000);
+try{var r=await _call(task,payload);clearInterval(tm);show("Done.");hide=setTimeout(function(){bx.style.display="none"},2500);return r}catch(e){clearInterval(tm);show("AI request failed: "+e.message,true);hide=setTimeout(function(){bx.style.display="none"},15000);throw e}}})();

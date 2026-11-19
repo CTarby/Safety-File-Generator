@@ -106,7 +106,7 @@ function buildTask(b) {
   }
   if (task === "gap_check") {
     return {
-      max: 10000,
+      max: 6000,
       content: [{
         type: "text",
         text: contextBlock(b) + "\n\n" +
@@ -148,37 +148,49 @@ function buildTask(b) {
         '"hazards":[{"activity":"...","hazard":"...","consequence":"...","likelihood":3,"severity":4,"controls":["..."],"ppe":"..."}],' +
         '"confirm":["..."]}',
     });
-    return { content, max: 8000 };
+    return { content, max: 5000 };
   }
   if (task === "she_plan") {
+    // Written in up to three parts at the same time, so the whole plan finishes well inside the time limit.
     const spec = b.mode === "spec";
     const extra = "\nTEAM ROLES ON SITE: " + clip((b.team_roles || []).join("; "), 2000) +
       "\nWRITTEN APPOINTMENTS IN THIS FILE: " + clip((b.appointments || []).join("; "), 3000);
-    return {
-      max: 16000,
-      content: [{
-        type: "text",
-        text: contextBlock(b) + extra + "\n\n" +
-          (spec
-            ? "Write the complete site-specific SHE plan for this job under the client's own specification. Use one section per top-level " +
-              "client requirement, with exactly the client's number and a short heading taken from the requirement. In each section state " +
-              "what the company will do on site to meet the requirement and its sub-items, specific to this scope of work, and refer to the " +
-              "documents in the file by title and number. Where evidence must be supplied, say who supplies what and when. Where no document " +
-              "in the file covers a requirement, say what will be done and end with '[Document to be developed]'."
-            : "Write the complete site-specific SHE plan for this job as required by the Construction Regulations 2014 (the principal " +
-              "contractor's health and safety plan) and the OHS Act. Use these headings, leaving out any that do not apply to this scope and " +
-              "adding any the scope needs: Scope and description of the work; Legal and client requirements; Organisation, responsibilities " +
-              "and appointments; Risk assessment; Safe work procedures and permits to work; Fall protection (only if work at height); Plant, " +
-              "equipment and inspections; Competence, training and medical fitness; Induction and communication; Personal protective " +
-              "equipment; Emergency preparedness and first aid; Incident reporting and investigation; Contractor management (only if " +
-              "contractors are used); Occupational health and hygiene; Environmental controls and housekeeping; Monitoring, inspections and " +
-              "audits; Health and safety file and records; Review of this plan. Write each section specifically for this scope, site and " +
-              "client, and refer to the documents in the file by title and number.") +
-          "\nWrite in plain South African English, using the company's name. Paragraphs are separated by new lines; list items start with '- '.\n" +
-          "Reply with JSON only, in this form:\n" +
-          '{"sections":[{"no":"1","heading":"...","text":"..."}]}',
-      }],
-    };
+    const HEAD = ["Scope and description of the work", "Legal and client requirements", "Organisation, responsibilities and appointments",
+      "Risk assessment", "Safe work procedures and permits to work", "Fall protection (only if there is work at height)",
+      "Plant, equipment and inspections", "Competence, training and medical fitness", "Induction and communication",
+      "Personal protective equipment", "Emergency preparedness and first aid", "Incident reporting and investigation",
+      "Contractor management (only if contractors are used)", "Occupational health and hygiene",
+      "Environmental controls and housekeeping", "Monitoring, inspections and audits", "Health and safety file and records",
+      "Review of this plan"];
+    const reqs = Array.isArray(b.requirements) ? b.requirements : [];
+    const groups = [];
+    if (spec) {
+      const n = Math.max(1, Math.min(3, Math.ceil(reqs.length / 6)));
+      for (let g = 0; g < n; g++) groups.push(reqs.filter((_, k) => k % n === g));
+    } else {
+      groups.push(HEAD.slice(0, 6), HEAD.slice(6, 12), HEAD.slice(12));
+    }
+    const fmt = "\nWrite in plain South African English, using the company's name. Each section is 60 to 180 words: specific, " +
+      "practical and not repeating other sections. Paragraphs are separated by new lines; list items start with '- '.\n" +
+      "Reply with JSON only, in this form:\n" + '{"sections":[{"no":"1","heading":"...","text":"..."}]}';
+    const parts = groups.map((grp, gi) => {
+      if (spec) {
+        return [{ type: "text", text: contextBlock(b) + extra + "\n\n" +
+          "You are writing part of the site-specific SHE plan for this job under the client's own specification. Write sections ONLY for " +
+          "these client requirements: " + grp.map((r) => clip(r.no, 20)).join(", ") + ". Use one section per requirement, with exactly the " +
+          "client's number and a short heading taken from the requirement. In each section state what the company will do on site to meet " +
+          "the requirement and its sub-items, specific to this scope of work, and refer to the documents in the file by title and number. " +
+          "Where evidence must be supplied, say who supplies what and when. Where no document in the file covers a requirement, say what " +
+          "will be done and end with '[Document to be developed]'." + fmt }];
+      }
+      const start = gi * 6 + 1;
+      return [{ type: "text", text: contextBlock(b) + extra + "\n\n" +
+        "You are writing part of the site-specific SHE plan for this job, as required by the Construction Regulations 2014 (the principal " +
+        "contractor's health and safety plan) and the OHS Act. Write ONLY these sections, in this order, numbering them from " + start +
+        ", and leave out any that do not apply to this scope: " + grp.join("; ") + ". Write each section specifically for this scope, " +
+        "site and client, and refer to the documents in the file by title and number." + fmt }];
+    });
+    return { parts, max: 6000, merge: "sections" };
   }
   if (task === "improve_doc") {
     return {
@@ -225,22 +237,57 @@ async function handle(req) {
   }
   const usageId = bj;
 
+  const refund = () => fetch(SB_URL + "/rest/v1/rpc/ai_refund", {
+    method: "POST",
+    headers: { apikey, Authorization: auth, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_id: usageId }),
+  }).catch(() => null);
+
   // 2. Build the request for this task only. The browser cannot send its own instructions.
   let t;
-  try { t = buildTask(body); } catch (e) { return reply({ error: String(e.message || e) }, 400); }
+  try { t = buildTask(body); } catch (e) { await refund(); return reply({ error: String(e.message || e) }, 400); }
 
-  // 3. Ask Claude.
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "x-api-key": KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: MODEL, max_tokens: t.max, system: SYSTEM, messages: [{ role: "user", content: t.content }] }),
-  });
-  const j = await r.json().catch(() => null);
-  if (!r.ok) {
-    const m = (j && j.error && j.error.message) || ("status " + r.status);
-    return reply({ error: "The AI service returned an error: " + m }, 502);
+  // 3. Ask Claude (each request is stopped after 140 seconds so the app always gets an answer).
+  async function ask(content) {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 140000);
+    try {
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        signal: ctl.signal,
+        headers: { "x-api-key": KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+        body: JSON.stringify({ model: MODEL, max_tokens: t.max, system: SYSTEM, messages: [{ role: "user", content }] }),
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) throw new Error("The AI service returned an error: " + ((j && j.error && j.error.message) || ("status " + r.status)));
+      return j;
+    } catch (e) {
+      if (e && e.name === "AbortError") throw new Error("The AI took too long to answer. Please try again; if it keeps happening, shorten the scope or the document.");
+      throw e;
+    } finally { clearTimeout(timer); }
   }
-  const text = (j.content || []).filter((c) => c.type === "text").map((c) => c.text).join("");
+  let j, text;
+  try {
+    if (t.parts) {
+      const rs = await Promise.all(t.parts.map((c) => ask(c)));
+      const all = [];
+      let cut = false;
+      rs.forEach((x) => {
+        const s = (x.content || []).filter((c) => c.type === "text").map((c) => c.text).join("");
+        if (x.stop_reason === "max_tokens") cut = true;
+        const a = s.indexOf("{"), z = s.lastIndexOf("}");
+        try { const o = JSON.parse(s.slice(a, z + 1)); (o[t.merge] || []).forEach((v) => all.push(v)); } catch (_e) { cut = true; }
+      });
+      j = { stop_reason: cut ? "max_tokens" : "end_turn", usage: { input_tokens: rs.reduce((n, x) => n + ((x.usage && x.usage.input_tokens) || 0), 0), output_tokens: rs.reduce((n, x) => n + ((x.usage && x.usage.output_tokens) || 0), 0) } };
+      const o = {}; o[t.merge] = all; text = JSON.stringify(o);
+    } else {
+      j = await ask(t.content);
+      text = (j.content || []).filter((c) => c.type === "text").map((c) => c.text).join("");
+    }
+  } catch (e) {
+    await refund();
+    return reply({ error: String((e && e.message) || e) + " This request has not been counted." }, 504);
+  }
 
   // 4. Record token use (for cost tracking by the administrator).
   try {
