@@ -19,15 +19,16 @@ This is a practical checklist, not legal advice. Have your Information Officer c
 | Access control and accountability (s8, s19) | Two roles (Administrator, Staff). The activity log records sign-ins, file access, saves, shares, deletions, letter creation and every PDF download. Only administrators can read it, and the app cannot change it. |
 | Controlled output | Documents leave only as PDFs, and each download is logged. There are no data export or backup buttons for staff. |
 | Retention (s14) | Administrators and file owners can delete company files permanently. You decide the retention period (see below). |
-| Operators (s20, s21) | Supabase (database and login) and Vercel (website hosting) act as operators. |
+| Operators (s20, s21) | Supabase (database and login), Vercel (website hosting) and Anthropic (AI assistant) act as operators. |
+| AI assistant | Names, ID numbers and signatures are removed before text is sent to the AI. Uploaded PDFs and photos of client specifications are sent as they are. Each AI request is logged and limited per person per day. |
 | Cross-border transfer (s72) | Supabase has no South African region, so data will be stored in the EU or UK, where GDPR or UK GDPR applies. |
 | Security compromises (s22) | The activity log helps establish what was accessed and by whom. |
 
 ## What GSRC must still do
 
 1. **Information Officer.** Make sure your Information Officer is registered with the Information Regulator, and that this system is in your POPIA register or PAIA manual.
-2. **Operator agreements (s21).** Accept Supabase's and Vercel's Data Processing Addendums (DPAs) in their dashboards or on their legal pages, and keep copies on file.
-3. **Transfer outside South Africa (s72).** Record that the data is held in the EU or UK and that you rely on GDPR-level protection and the DPAs. Mention it in your privacy notice.
+2. **Operator agreements (s21).** Accept Supabase's, Vercel's and Anthropic's data processing terms (DPAs) and keep copies on file. Check Anthropic's current commercial terms on how long API data is kept and that it is not used for model training.
+3. **Transfer outside South Africa (s72).** Record that the data is held in the EU or UK, and that specification text sent to the AI is processed by Anthropic outside South Africa, and that you rely on GDPR-level protection and the DPAs. Mention it in your privacy notice.
 4. **Tell the people concerned (s18).** Tell your clients and their employees that their names and ID numbers are processed to prepare appointment letters and safety files. A clause in your service agreement, plus a line on the appointment letter, is the usual route.
 5. **Retention period (s14).** Decide how long company files are kept. Safety files are often kept for the project duration plus a set number of years. Have an administrator delete expired files, and note the decision in your retention schedule.
 6. **Staff rules.** Each user has their own login and must not share passwords. PDFs saved to laptops or email are personal information too: keep them in your controlled document system and delete local copies. Switch off users the day they leave.
