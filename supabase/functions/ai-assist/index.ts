@@ -120,35 +120,45 @@ function buildTask(b) {
     };
   }
   if (task === "analyse_scope") {
+    // Done in two parts at the same time (what the job needs, and the job hazards) so that
+    // a detailed scope neither runs out of reply space nor takes too long.
     const cat = b.catalog || {};
     const list = (x) => (Array.isArray(x) ? x.slice(0, 200).map((v) => "- " + clip(v, 120)).join("\n") : "");
-    const content = [];
+    const base = [];
     const file = b.file;
     if (file && file.data) {
       if (String(file.data).length > 14_000_000) throw new Error("The file is too large. Use a file under 10 MB.");
-      if (file.type === "application/pdf") content.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: file.data } });
-      else if (/^image\/(png|jpeg|gif|webp)$/.test(file.type)) content.push({ type: "image", source: { type: "base64", media_type: file.type, data: file.data } });
+      if (file.type === "application/pdf") base.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: file.data } });
+      else if (/^image\/(png|jpeg|gif|webp)$/.test(file.type)) base.push({ type: "image", source: { type: "base64", media_type: file.type, data: file.data } });
       else throw new Error("Unsupported file type.");
     }
-    if (b.doc_text) content.push({ type: "text", text: "SCOPE DOCUMENT TEXT:\n" + clip(b.doc_text, 120000) });
-    content.push({
+    if (b.doc_text) base.push({ type: "text", text: "SCOPE DOCUMENT TEXT:\n" + clip(b.doc_text, 120000) });
+    const ctx = contextBlock({ ...b, documents: [] }) + "\n\n";
+    const partA = base.concat([{
       type: "text",
-      text: contextBlock({ ...b, documents: [] }) + "\n\n" +
+      text: ctx +
         "CATALOGUE (choose only from these, using the names exactly as written):\n" +
         "WORK TYPES:\n" + list(cat.work_types) + "\n\nTASKS AND ACTIVITIES:\n" + list(cat.tasks) +
         "\n\nEQUIPMENT (each has an inspection register):\n" + list(cat.equipment) + "\n\nAPPOINTMENTS:\n" + list(cat.appointments) + "\n\n" +
         "Read the scope of work (and the scope document, if one is attached) and decide everything this job needs for its site-specific " +
         "safety file under the OHS Act and the Construction Regulations 2014: the work types, tasks and activities, equipment that will be " +
-        "used on site, and the written appointments. Be complete but do not add things the scope gives no reason for. Then list up to 15 " +
-        "hazards specific to this job that a general work-type hazard list would miss, each rated before controls with likelihood and " +
-        "severity from 1 to 5, with practical controls and PPE. Finally list anything the preparer must confirm because the scope is unclear.\n" +
+        "used on site, and the written appointments. Choose the closest catalogue entries even when the scope uses different words " +
+        "(for example machinery inspection, overhaul or commissioning work). Be complete but do not add things the scope gives no reason for. " +
+        "Keep each \"why\" under 15 words. List anything the preparer must confirm because the scope is unclear (at most 6 short items).\n" +
         "Reply with JSON only, in this form:\n" +
         '{"summary":"2-3 sentences","work_types":[{"name":"...","why":"..."}],"tasks":[{"name":"...","why":"..."}],' +
-        '"equipment":[{"name":"...","why":"..."}],"appointments":[{"name":"...","why":"..."}],"contractor_likely":false,' +
-        '"hazards":[{"activity":"...","hazard":"...","consequence":"...","likelihood":3,"severity":4,"controls":["..."],"ppe":"..."}],' +
-        '"confirm":["..."]}',
-    });
-    return { content, max: 5000 };
+        '"equipment":[{"name":"...","why":"..."}],"appointments":[{"name":"...","why":"..."}],"contractor_likely":false,"confirm":["..."]}',
+    }]);
+    const partB = base.concat([{
+      type: "text",
+      text: ctx +
+        "Read the scope of work (and the scope document, if one is attached). List up to 12 hazards specific to this job that a general " +
+        "work-type hazard list would miss, each rated before controls with likelihood and severity from 1 to 5, with at most 4 short, " +
+        "practical controls and the PPE. Keep every field short.\n" +
+        "Reply with JSON only, in this form:\n" +
+        '{"hazards":[{"activity":"...","hazard":"...","consequence":"...","likelihood":3,"severity":4,"controls":["..."],"ppe":"..."}]}',
+    }]);
+    return { parts: [partA, partB], max: 6000, merge: "*" };
   }
   if (task === "she_plan") {
     // Written in up to three parts at the same time, so the whole plan finishes well inside the time limit.
@@ -272,14 +282,20 @@ async function handle(req) {
       const rs = await Promise.all(t.parts.map((c) => ask(c)));
       const all = [];
       let cut = false;
+      const whole = {};
       rs.forEach((x) => {
         const s = (x.content || []).filter((c) => c.type === "text").map((c) => c.text).join("");
         if (x.stop_reason === "max_tokens") cut = true;
         const a = s.indexOf("{"), z = s.lastIndexOf("}");
-        try { const o = JSON.parse(s.slice(a, z + 1)); (o[t.merge] || []).forEach((v) => all.push(v)); } catch (_e) { cut = true; }
+        try {
+          const o = JSON.parse(s.slice(a, z + 1));
+          if (t.merge === "*") Object.keys(o).forEach((k) => { if (!(k in whole)) whole[k] = o[k]; });
+          else (o[t.merge] || []).forEach((v) => all.push(v));
+        } catch (_e) { cut = true; }
       });
       j = { stop_reason: cut ? "max_tokens" : "end_turn", usage: { input_tokens: rs.reduce((n, x) => n + ((x.usage && x.usage.input_tokens) || 0), 0), output_tokens: rs.reduce((n, x) => n + ((x.usage && x.usage.output_tokens) || 0), 0) } };
-      const o = {}; o[t.merge] = all; text = JSON.stringify(o);
+      if (t.merge === "*" && !Object.keys(whole).length) throw new Error("The AI reply could not be read. Please try again.");
+      let o = {}; if (t.merge === "*") o = whole; else o[t.merge] = all; text = JSON.stringify(o);
     } else {
       j = await ask(t.content);
       text = (j.content || []).filter((c) => c.type === "text").map((c) => c.text).join("");
